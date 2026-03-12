@@ -1,0 +1,48 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.authorize = exports.authenticate = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const prisma_client_js_1 = __importDefault(require("../model/prisma.client.js"));
+const authenticate = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization?.replace('Bearer ', '');
+        if (!token) {
+            return res.status(401).json({ message: 'Authentification requise' });
+        }
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const user = await prisma_client_js_1.default.user.findUnique({
+            where: { id: decoded.id },
+            select: { id: true, email: true, role: true }
+        });
+        if (!user) {
+            return res.status(401).json({ message: 'Utilisateur non trouvé' });
+        }
+        req.user = user;
+        next();
+    }
+    catch (error) {
+        if (error instanceof jsonwebtoken_1.default.JsonWebTokenError) {
+            return res.status(401).json({ message: 'Token invalide' });
+        }
+        if (error instanceof jsonwebtoken_1.default.TokenExpiredError) {
+            return res.status(401).json({ message: 'Token expiré' });
+        }
+        res.status(500).json({ message: 'Erreur d\'authentification' });
+    }
+};
+exports.authenticate = authenticate;
+const authorize = (...roles) => {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Authentification requise' });
+        }
+        if (!roles.includes(req.user.role)) {
+            return res.status(403).json({ message: 'Accès non autorisé' });
+        }
+        next();
+    };
+};
+exports.authorize = authorize;

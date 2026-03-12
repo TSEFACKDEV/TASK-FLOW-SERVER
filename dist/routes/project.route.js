@@ -1,0 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const project_controller_js_1 = require("../controllers/project.controller.js");
+const validation_middleware_js_1 = require("../middlewares/validation.middleware.js");
+const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_js_1.authenticate);
+router.post('/', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.projectValidation), project_controller_js_1.createProject);
+router.get('/', project_controller_js_1.getAllProjects);
+router.get('/:id', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), project_controller_js_1.getProjectById);
+router.put('/:id', (0, validation_middleware_js_1.validate)([...validation_middleware_js_1.idValidation, ...validation_middleware_js_1.projectValidation]), project_controller_js_1.updateProject);
+router.delete('/:id', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), project_controller_js_1.deleteProject);
+router.post('/:id/members', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), project_controller_js_1.addMember);
+router.delete('/:id/members/:userId', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), project_controller_js_1.removeMember);
+exports.default = router;

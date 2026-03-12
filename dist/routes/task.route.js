@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const task_controller_js_1 = require("../controllers/task.controller.js");
+const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+const validation_middleware_js_1 = require("../middlewares/validation.middleware.js");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_js_1.authenticate);
+router.post('/', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.taskValidation), task_controller_js_1.createTask);
+router.get('/', task_controller_js_1.getTasks);
+router.get('/:id', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), task_controller_js_1.getTaskById);
+router.put('/:id', (0, validation_middleware_js_1.validate)([...validation_middleware_js_1.idValidation, ...validation_middleware_js_1.taskValidation]), task_controller_js_1.updateTask);
+router.patch('/:id/status', (0, validation_middleware_js_1.validate)([...validation_middleware_js_1.idValidation, ...validation_middleware_js_1.taskStatusValidation]), task_controller_js_1.updateTaskStatus);
+router.patch('/:id/assign', (0, validation_middleware_js_1.validate)([...validation_middleware_js_1.idValidation, ...validation_middleware_js_1.taskAssignmentValidation]), task_controller_js_1.updateTaskAssignment);
+router.delete('/:id', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), task_controller_js_1.deleteTask);
+router.post('/:id/comments', (0, validation_middleware_js_1.validate)(validation_middleware_js_1.idValidation), task_controller_js_1.addComment);
+exports.default = router;

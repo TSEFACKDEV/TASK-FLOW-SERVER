@@ -1,0 +1,119 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  password       String
+  nom            String
+  prenom         String?
+  role           Role      @default(MEMBER)
+  dateInscription DateTime @default(now())
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+  
+  projetsCrees   Project[] @relation("Creator")
+  projetsMembre  MembreProjet[]
+  tachesAssignees Task[]   @relation("Assignee")
+  commentaires   Commentaire[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  titre       String
+  description String?
+  creatorId   String
+  dateCreation DateTime @default(now())
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+  
+  creator     User      @relation("Creator", fields: [creatorId], references: [id])
+  membres     MembreProjet[]
+  taches      Task[]
+  
+  @@map("projects")
+}
+
+model MembreProjet {
+  userId    String
+  projectId String
+  joinedAt  DateTime @default(now())
+  
+  user   User    @relation(fields: [userId], references: [id])
+  project Project @relation(fields: [projectId], references: [id])
+
+  @@id([userId, projectId])
+  @@map("membres_projets")
+}
+
+model Task {
+  id          String   @id @default(uuid())
+  titre       String
+  description String?
+  projetId    String
+  assigneA    String?
+  statut      Statut   @default(A_FAIRE)
+  echeance    DateTime?
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  projet      Project  @relation(fields: [projetId], references: [id])
+  assigne     User?    @relation("Assignee", fields: [assigneA], references: [id])
+  commentaires Commentaire[]
+  historique  HistoriqueTask[]
+
+  @@map("tasks")
+}
+
+model Commentaire {
+  id        String   @id @default(uuid())
+  contenu   String
+  taskId    String
+  userId    String
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  task      Task     @relation(fields: [taskId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("commentaires")
+}
+
+model HistoriqueTask {
+  id         String   @id @default(uuid())
+  taskId     String
+  userId     String
+  action     String
+  ancienneValeur String?
+  nouvelleValeur String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  
+  task       Task     @relation(fields: [taskId], references: [id])
+
+  @@map("historique_tasks")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+}
+
+enum Statut {
+  A_FAIRE
+  EN_COURS
+  TERMINE
+}

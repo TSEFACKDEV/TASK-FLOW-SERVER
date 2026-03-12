@@ -1,0 +1,19 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const user_controller_js_1 = require("../controllers/user.controller.js");
+const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+const checkPermission_js_1 = __importDefault(require("../middlewares/checkPermission.js"));
+const router = express_1.default.Router();
+router.get("/public-sellers", user_controller_js_1.getAllUsers);
+router.get("/seller/:id", user_controller_js_1.getUserBySlugOrId);
+router.use(auth_middleware_js_1.authenticate);
+router.post("/", (0, checkPermission_js_1.default)("USER_CREATE"), user_controller_js_1.createUser);
+router.get("/", (0, checkPermission_js_1.default)("USER_GET_ALL"), user_controller_js_1.getAllUsers);
+router.get("/:id", (0, checkPermission_js_1.default)("USER_GET_BY_ID"), user_controller_js_1.getUserBySlugOrId);
+router.put("/:id", (0, checkPermission_js_1.default)("USER_UPDATE"), user_controller_js_1.updateUser);
+router.post("/report/:id", (0, checkPermission_js_1.default)("USER_REPORT"), user_controller_js_1.reportUser);
+exports.default = router;

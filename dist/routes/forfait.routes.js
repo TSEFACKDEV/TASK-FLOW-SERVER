@@ -1,0 +1,21 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const forfait_controller_js_1 = require("../controllers/forfait.controller.js");
+const auth_middleware_js_1 = require("../middlewares/auth.middleware.js");
+const checkPermission_js_1 = __importDefault(require("../middlewares/checkPermission.js"));
+const validation_js_1 = __importDefault(require("../middlewares/validation.js"));
+const forfait_validation_js_1 = require("../validations/forfait.validation.js");
+const debugLogger_js_1 = require("../middlewares/debugLogger.js");
+const rateLimiter_js_1 = require("../middlewares/rateLimiter.js");
+const router = express_1.default.Router();
+router.get("/", forfait_controller_js_1.getAllForfaits);
+router.get("/product/:productId", forfait_controller_js_1.getProductForfaits);
+router.get("/check-eligibility", auth_middleware_js_1.authenticate, forfait_controller_js_1.checkForfaitEligibility);
+router.post("/assign-with-payment", debugLogger_js_1.debugForfaitPayment, auth_middleware_js_1.authenticate, rateLimiter_js_1.forfaitRateLimiter, (0, validation_js_1.default)(forfait_validation_js_1.assignForfaitSchema), forfait_controller_js_1.assignForfaitWithPayment);
+router.post("/assign-without-payment", auth_middleware_js_1.authenticate, (0, checkPermission_js_1.default)("ASSIGN_FORFAIT"), forfait_controller_js_1.assignForfaitWithoutPayment);
+router.post("/deactivate", auth_middleware_js_1.authenticate, (0, checkPermission_js_1.default)("ASSIGN_FORFAIT"), forfait_controller_js_1.deactivateForfait);
+exports.default = router;

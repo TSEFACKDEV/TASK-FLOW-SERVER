@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const heroBannerController_1 = require("../controllers/heroBannerController");
+const uploadController_1 = require("../controllers/uploadController");
+const auth_middleware_1 = require("../middlewares/auth.middleware");
+const router = (0, express_1.Router)();
+router.get('/active', heroBannerController_1.getActiveHeroBanners);
+router.post('/upload', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, uploadController_1.uploadHeroMedia);
+router.delete('/upload/:fileName', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, uploadController_1.deleteHeroMedia);
+router.get('/', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.getAllHeroBanners);
+router.get('/:id', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.getHeroBannerById);
+router.post('/', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.createHeroBanner);
+router.put('/:id', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.updateHeroBanner);
+router.delete('/:id', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.deleteHeroBanner);
+router.post('/reorder', auth_middleware_1.authenticate, auth_middleware_1.isAdmin, heroBannerController_1.reorderHeroBanners);
+exports.default = router;
