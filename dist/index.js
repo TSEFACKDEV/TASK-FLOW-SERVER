@@ -13,8 +13,31 @@ const morgan_1 = __importDefault(require("morgan"));
 const prisma_client_js_1 = __importDefault(require("./model/prisma.client.js"));
 const app = (0, express_1.default)();
 app.use((0, helmet_1.default)());
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'https://task-flow-client-chi.vercel.app',
+    /^https:\/\/task-flow-client-.*\.vercel\.app$/,
+    process.env.CORS_ORIGIN
+].filter(Boolean);
 app.use((0, cors_1.default)({
-    origin: env_js_1.default.CORS_ORIGIN || 'http://localhost:5173',
+    origin: function (origin, callback) {
+        if (!origin)
+            return callback(null, true);
+        const isAllowed = allowedOrigins.some(allowed => {
+            if (allowed instanceof RegExp) {
+                return allowed.test(origin);
+            }
+            return allowed === origin;
+        });
+        if (isAllowed) {
+            callback(null, true);
+        }
+        else {
+            console.log('🚫 Origine non autorisée:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200
 }));

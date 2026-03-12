@@ -14,8 +14,35 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+// CORS configuration améliorée
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://task-flow-client-chi.vercel.app',
+  /^https:\/\/task-flow-client-.*\.vercel\.app$/, // Accepte toutes les URLs de preview
+  process.env.CORS_ORIGIN
+].filter(Boolean);
+
 app.use(cors({
-  origin: env.CORS_ORIGIN || 'http://localhost:5173',
+  origin: function(origin, callback) {
+    // Autoriser les requêtes sans origin (comme les apps mobiles ou Postman)
+    if (!origin) return callback(null, true);
+    
+    // Vérifier si l'origine est autorisée
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return allowed === origin;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('🚫 Origine non autorisée:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 }));
