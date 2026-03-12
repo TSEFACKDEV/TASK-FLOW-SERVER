@@ -2,7 +2,7 @@
   "name": "market-place-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "start": "node ./dist/index.js",
     "start:prod": "NODE_ENV=production node ./dist/index.js",
@@ -29,7 +29,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@prisma/client": "^6.16.2",
     "@types/cookie-parser": "^1.4.9",
